@@ -12,6 +12,7 @@ struct ContentView: View {
     
     let resorts: [Resort] = Bundle.main.decode("resorts.json")
     
+    @State private var favorites = Favorites()
     @State private var searchText: String = ""
     
     var body: some View {
@@ -37,6 +38,14 @@ struct ContentView: View {
                             Text("\(resort.runs) runs")
                                 .foregroundStyle(.secondary)
                         }
+                        
+                        if favorites.contains(resort) {
+                            Spacer()
+                            
+                            Image(systemName: "heart.fill")
+                                .accessibilityLabel("This a favorite resort")
+                                .foregroundStyle(.red)
+                        }
                     }
                 }
             }
@@ -47,7 +56,9 @@ struct ContentView: View {
             .searchable(text: $searchText, prompt: "Search for a resort")
         } detail: {
             WelcomeView()
+                .environment(Favorites())
         }
+        .environment(favorites)
     }
 }
 

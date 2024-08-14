@@ -11,6 +11,10 @@ struct DetailView: View {
     
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(\.dynamicTypeSize) var dynamicTypeSize
+    @Environment(Favorites.self) var favorites
+    
+    @State private var selectedFacility: Facility?
+    @State private var showingFacility: Bool = false
     
     let resort: Resort
     
@@ -34,6 +38,16 @@ struct DetailView: View {
                 .background(.primary.opacity(0.1))
                 .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                 
+                ZStack {
+                    RoundedRectangle(cornerRadius: 1)
+                        .frame(height: 30)
+                    VStack {
+                        Text("Image of : \(Text(resort.imageCredit).bold())")
+                            .foregroundStyle(.white)
+                    }
+                }
+                .padding(.vertical, 2)
+                
                 Group {
                     Text(resort.description)
                         .padding(.vertical)
@@ -41,17 +55,46 @@ struct DetailView: View {
                     Text("Facilities")
                         .font(.headline)
                     
-                    Text(resort.facilities, format: .list(type: .and))
-                        .padding(.vertical)
+                    // MARK: Old Display of facilities
+//                    Text(resort.facilities, format: .list(type: .and))
+//                        .padding(.vertical)
+                    
+                    HStack {
+                        ForEach(resort.facilityTypes) { facility in
+                            Button {
+                                selectedFacility = facility
+                                showingFacility = true
+                            } label: {
+                                facility.icon
+                                    .font(.title)
+                            }
+                        }
+                    }
+                    .padding(.vertical)
                 }
                 .padding(.horizontal)
             }
+            
+            Button(favorites.contains(resort) ? "Remove from favorites" : "Add to favorites") {
+                if favorites.contains(resort) {
+                    favorites.remove(resort)
+                } else {
+                    favorites.add(resort)
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .padding()
         }
         .navigationTitle("\(resort.name), \(resort.country)")
         .navigationBarTitleDisplayMode(.inline)
+        .alert(selectedFacility?.name ?? "More information", isPresented: $showingFacility, presenting: selectedFacility) { _ in
+        } message: { facility in
+            Text(facility.description)
+        }
     }
 }
 
 #Preview {
     DetailView(resort: .example)
+        .environment(Favorites())
 }

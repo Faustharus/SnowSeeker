@@ -12,8 +12,15 @@ class Favorites {
     private var resorts: Set<String>
     private var key: String = "Favorites"
     
-    init() {
-        // MARK: Load function
+    init(key: String = "Favorites") {
+        self.key = key
+        
+        if let saved = UserDefaults.standard.data(forKey: key) {
+            if let decoded = try? JSONDecoder().decode(Set<String>.self, from: saved) {
+                resorts = decoded
+                return
+            }
+        }
         
         resorts = []
     }
@@ -33,8 +40,8 @@ class Favorites {
     }
     
     func save() {
-        if let data = UserDefaults.standard.string(forKey: key) {
-            try? data.write(to: <#T##URL#>, atomically: <#T##Bool#>, encoding: <#T##String.Encoding#>)
+        if let encoded = try? JSONEncoder().encode(resorts) {
+            UserDefaults.standard.set(encoded, forKey: key)
         }
     }
 }

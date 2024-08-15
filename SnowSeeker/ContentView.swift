@@ -7,6 +7,9 @@
 
 import SwiftUI
 
+enum SortingOrder: String, CaseIterable {
+    case regular, alphabetic, country
+}
 
 struct ContentView: View {
     
@@ -14,6 +17,9 @@ struct ContentView: View {
     
     @State private var favorites = Favorites()
     @State private var searchText: String = ""
+    
+    @State private var sorting: SortingOrder = .regular
+    @State private var showingSortOptions: Bool = false
     
     var body: some View {
         NavigationSplitView {
@@ -54,9 +60,20 @@ struct ContentView: View {
                 DetailView(resort: resort)
             }
             .searchable(text: $searchText, prompt: "Search for a resort")
+            .toolbar {
+                Button {
+                    self.showingSortOptions = true
+                } label: {
+                    Label("Change sort order", systemImage: "arrow.up.arrow.down")
+                }
+            }
+            .confirmationDialog("Sorting Choices", isPresented: $showingSortOptions) {
+                Button("Default") { sorting = .regular }
+                Button("Alphabetic") { sorting = .alphabetic }
+                Button("Country") { sorting = .country }
+            }
         } detail: {
             WelcomeView()
-                .environment(Favorites())
         }
         .environment(favorites)
     }
@@ -73,6 +90,23 @@ extension ContentView {
             resorts
         } else {
             resorts.filter { $0.name.localizedStandardContains(searchText) }
+        }
+    }
+    
+    var sortedResorts: [Resort] {
+        switch sorting {
+        case .regular:
+            return resorts.sorted { first, second in
+                first.id < second.id
+            }
+        case .alphabetic:
+            return resorts.sorted { first, second in
+                first.name < second.name
+            }
+        case .country:
+            return resorts.sorted { first, second in
+                first.country < second.country
+            }
         }
     }
     

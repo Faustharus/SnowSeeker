@@ -23,7 +23,7 @@ struct ContentView: View {
     
     var body: some View {
         NavigationSplitView {
-            List(filteredResorts) { resort in
+            List(sortedResorts) { resort in
                 NavigationLink(value: resort) {
                     HStack {
                         Image(resort.country)
@@ -96,15 +96,13 @@ extension ContentView {
     var sortedResorts: [Resort] {
         switch sorting {
         case .regular:
-            return resorts.sorted { first, second in
-                first.id < second.id
-            }
+            return filteredResorts
         case .alphabetic:
-            return resorts.sorted { first, second in
+            return filteredResorts.sorted { first, second in
                 first.name < second.name
             }
         case .country:
-            return resorts.sorted { first, second in
+            return filteredResorts.sorted { first, second in
                 first.country < second.country
             }
         }
